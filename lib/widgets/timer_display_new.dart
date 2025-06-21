@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/timer_provider.dart';
-import 'circular_timer_progress.dart';
-import 'pulsing_widget.dart';
 
 class TimerDisplay extends StatelessWidget {
   const TimerDisplay({super.key});
@@ -30,7 +28,7 @@ class TimerDisplay extends StatelessWidget {
               builder: (context, constraints) {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisSize: MainAxisSize.min, // Important for preventing overflow
                   children: [
                     // Timer type indicator
                     Container(
@@ -39,91 +37,67 @@ class TimerDisplay extends StatelessWidget {
                         color: Theme.of(context).colorScheme.primaryContainer,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            timerProvider.currentPhaseIcon,
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            timerProvider.currentPhaseDescription,
-                            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onPrimaryContainer,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        timerProvider.currentPhaseDescription,
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                     
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16), // Reduced spacing
                     
-                    // Circular timer display for Pomodoro
-                    if (timerProvider.timerType == TimerType.pomodoro)
-                      PulsingWidget(
-                        isActive: timerProvider.isRunning,
-                        child: CircularTimerProgress(
-                          progress: timerProvider.progress,
-                          progressColor: _getProgressColor(context, timerProvider.pomodoroPhase),
-                          backgroundColor: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-                          strokeWidth: 8.0,
-                          size: constraints.maxWidth * 0.7,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              // Main timer display
-                              FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Text(
-                                  timerProvider.formattedTimeRemaining,
-                                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                                    fontWeight: FontWeight.w300,
-                                    letterSpacing: -1,
-                                    color: Theme.of(context).colorScheme.onSurface,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              // Phase indicator
-                              Text(
-                                'Round ${timerProvider.pomodoroRounds + 1}',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    
-                    // Stopwatch display
-                    else
-                      PulsingWidget(
-                        isActive: timerProvider.isRunning,
-                        child: Column(
-                          children: [
-                            // Main timer display
-                            FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                timerProvider.formattedElapsedTime,
-                                style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                                  fontWeight: FontWeight.w300,
-                                  letterSpacing: -2,
-                                  color: Theme.of(context).colorScheme.onSurface,
-                                ),
-                              ),
-                            ),
-                          ],
+                    // Main timer display
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        timerProvider.formattedElapsedTime,
+                        style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                          fontWeight: FontWeight.w300,
+                          letterSpacing: -2,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
-                  ],
-                );
-              },
-            ),
+                    ),
+                    
+                    // Pomodoro specific info
+                    if (timerProvider.timerType == TimerType.pomodoro) ...[
+                      const SizedBox(height: 12),
+                      
+                      // Progress bar
+                      LinearProgressIndicator(
+                        value: timerProvider.progress,
+                        backgroundColor: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          _getProgressColor(context, timerProvider.pomodoroPhase),
+                        ),
+                        minHeight: 6,
+                      ),
+                      
+                      const SizedBox(height: 8),
+                      
+                      // Remaining time
+                      Text(
+                        'Remaining: ${timerProvider.formattedRemainingTime}',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 6),
+                      
+                      // Pomodoro rounds
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.secondaryContainer,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          'Round ${timerProvider.pomodoroRounds + 1}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSecondaryContainer,
                             fontWeight: FontWeight.w500,
                           ),
                         ),

@@ -203,6 +203,26 @@ class TimerSettingsSheet extends StatelessWidget {
                   
                   const SizedBox(height: 24),
                   
+                  // Sound settings
+                  Text(
+                    'Sound Settings',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 8),
+                  
+                  SwitchListTile(
+                    title: const Text('Enable Sounds'),
+                    subtitle: const Text('Play sounds when timer starts, stops, or completes'),
+                    value: timerProvider.soundEnabled,
+                    onChanged: (value) => timerProvider.setSoundEnabled(value),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
                   // Current status
                   if (timerProvider.timerType == TimerType.pomodoro) ...[
                     Container(

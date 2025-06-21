@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import '../models/study_session.dart';
 import '../models/task.dart';
 import '../services/database_helper.dart';
+import '../services/notification_service.dart';
+import '../services/audio_service.dart';
 
 enum TimerType { stopwatch, pomodoro }
 enum TimerState { stopped, running, paused }
@@ -10,6 +12,8 @@ enum PomodoroPhase { focus, shortBreak, longBreak }
 
 class TimerProvider with ChangeNotifier {
   final DatabaseHelper _databaseHelper = DatabaseHelper();
+  final NotificationService _notificationService = NotificationService();
+  final AudioService _audioService = AudioService();
   
   // Timer state
   TimerType _timerType = TimerType.stopwatch;
@@ -59,6 +63,9 @@ class TimerProvider with ChangeNotifier {
   int get shortBreakDuration => _shortBreakDuration;
   int get longBreakDuration => _longBreakDuration;
   int get longBreakInterval => _longBreakInterval;
+  
+  // Sound settings
+  bool get soundEnabled => _audioService.soundEnabled;
   
   // Progress getters
   double get progress {
@@ -118,6 +125,9 @@ class TimerProvider with ChangeNotifier {
       _setupTimerForType();
     }
     
+    // Play start sound
+    await _audioService.playStartSound();
+    
     _startTick();
     _clearError();
     notifyListeners();
@@ -139,9 +149,18 @@ class TimerProvider with ChangeNotifier {
     
     _timer?.cancel();
     
+    // Play stop sound
+    await _audioService.playStopSound();
+    
     // Save session if there was actual time elapsed
     if (_elapsedSeconds > 0 && _selectedTask != null) {
       await _saveStudySession();
+      
+      // Show completion notification
+      await _notificationService.showStudySessionCompleteNotification(
+        taskName: _selectedTask!.name,
+        duration: _formatTime(_elapsedSeconds),
+      );
     }
     
     _resetTimer();
@@ -201,6 +220,10 @@ class TimerProvider with ChangeNotifier {
         await _saveStudySession();
       }
       
+      // Play focus complete sound and show notification
+      await _audioService.playFocusCompleteSound();
+      await _notificationService.showPomodoroFocusCompleteNotification();
+      
       _pomodoroRounds++;
       
       // Determine next phase
@@ -211,15 +234,17 @@ class TimerProvider with ChangeNotifier {
       }
     } else {
       // Break completed - go back to focus
+      await _audioService.playBreakCompleteSound();
+      await _notificationService.showPomodoroBreakCompleteNotification();
       _pomodoroPhase = PomodoroPhase.focus;
     }
     
-    // Auto-start next phase or stop
+    // Reset timer state and setup for next phase
     _timerState = TimerState.stopped;
     _setupPomodoroTimer();
+    _startTime = null;
+    _pausedTime = null;
     notifyListeners();
-    
-    // TODO: Add notification/sound for phase completion
   }
 
   // Save study session to database
@@ -288,6 +313,12 @@ class TimerProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // Toggle sound
+  void setSoundEnabled(bool enabled) {
+    _audioService.setSoundEnabled(enabled);
+    notifyListeners();
+  }
+
   // Reset Pomodoro rounds
   void resetPomodoroRounds() {
     if (_timerState != TimerState.stopped) return;
@@ -333,6 +364,31 @@ class TimerProvider with ChangeNotifier {
       case PomodoroPhase.longBreak:
         return 'Long Break';
     }
+  }
+
+  // Get current phase icon
+  String get currentPhaseIcon {
+    if (_timerType == TimerType.stopwatch) {
+      return '⏱️';
+    }
+    
+    switch (_pomodoroPhase) {
+      case PomodoroPhase.focus:
+        return '🍅';
+      case PomodoroPhase.shortBreak:
+        return '☕';
+      case PomodoroPhase.longBreak:
+        return '🌟';
+    }
+  }
+
+  // Get formatted time remaining for display
+  String get formattedTimeRemaining {
+    if (_timerType == TimerType.stopwatch) {
+      return _formatTime(_elapsedSeconds);
+    }
+    final remaining = remainingSeconds > 0 ? remainingSeconds : 0;
+    return _formatTime(remaining);
   }
 
   @override
