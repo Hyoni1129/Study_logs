@@ -137,12 +137,10 @@ class BackgroundTimerWarning extends StatelessWidget {
 
 /// Mixin for handling app lifecycle changes
 mixin BackgroundTimerMixin<T extends StatefulWidget> on State<T> {
-  late final BackgroundTimerService _backgroundService;
   
   @override
   void initState() {
     super.initState();
-    _backgroundService = BackgroundTimerService();
     WidgetsBinding.instance.addObserver(_AppLifecycleObserver(
       onAppPaused: _onAppPaused,
       onAppResumed: _onAppResumed,

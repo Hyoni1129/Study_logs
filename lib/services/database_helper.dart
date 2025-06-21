@@ -302,4 +302,45 @@ class DatabaseHelper {
     final db = await database;
     await db.close();
   }
+
+  // Recalculate and update all task total times from study sessions
+  Future<void> recalculateTaskTotalTimes() async {
+    final db = await database;
+    
+    // Get all tasks
+    final tasks = await getAllTasks();
+    
+    for (final task in tasks) {
+      if (task.id != null) {
+        // Calculate total time from sessions
+        final result = await db.rawQuery('''
+          SELECT COALESCE(SUM(duration_seconds), 0) as total_time
+          FROM study_sessions 
+          WHERE task_id = ?
+        ''', [task.id]);
+        
+        final totalTime = result.first['total_time'] as int;
+        
+        // Update task with calculated total time
+        await db.update(
+          'tasks',
+          {
+            'total_time_seconds': totalTime,
+            'last_modified': DateTime.now().millisecondsSinceEpoch,
+          },
+          where: 'id = ?',
+          whereArgs: [task.id],
+        );
+      }
+    }
+  }
+
+  // Get enhanced tasks with accurate total times
+  Future<List<Task>> getAllTasksWithTotalTimes() async {
+    // First, recalculate total times to ensure accuracy
+    await recalculateTaskTotalTimes();
+    
+    // Then return tasks with updated total times
+    return await getAllTasks();
+  }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../providers/statistics_provider.dart';
+import '../utils/app_colors.dart';
 
 class StatisticsScreen extends StatelessWidget {
   const StatisticsScreen({super.key});
@@ -145,44 +146,87 @@ class StatisticsScreen extends StatelessWidget {
   }
 
   Widget _buildPeriodSelector(BuildContext context, StatisticsProvider statsProvider) {
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        gradient: AppColors.cardGradient,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: AppColors.cardShadow,
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Time Period',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    gradient: AppColors.primaryGradient,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Icon(
+                    Icons.date_range,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Time Period',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             
-            // Period buttons
-            SegmentedButton<StatsPeriod>(
-              segments: const [
-                ButtonSegment<StatsPeriod>(
-                  value: StatsPeriod.daily,
-                  label: Text('Daily'),
+            // Period buttons with fixed layout to prevent text wrapping
+            Container(
+              width: double.infinity,
+              height: 40, // Fixed height to prevent layout shifts
+              child: SegmentedButton<StatsPeriod>(
+                segments: const [
+                  ButtonSegment<StatsPeriod>(
+                    value: StatsPeriod.daily,
+                    label: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text('Daily', style: TextStyle(fontSize: 11)),
+                    ),
+                  ),
+                  ButtonSegment<StatsPeriod>(
+                    value: StatsPeriod.weekly,
+                    label: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text('Weekly', style: TextStyle(fontSize: 11)),
+                    ),
+                  ),
+                  ButtonSegment<StatsPeriod>(
+                    value: StatsPeriod.monthly,
+                    label: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text('Monthly', style: TextStyle(fontSize: 11)),
+                    ),
+                  ),
+                  ButtonSegment<StatsPeriod>(
+                    value: StatsPeriod.allTime,
+                    label: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text('All Time', style: TextStyle(fontSize: 11)),
+                    ),
+                  ),
+                ],
+                selected: {statsProvider.currentPeriod},
+                onSelectionChanged: (Set<StatsPeriod> newSelection) {
+                  statsProvider.setPeriod(newSelection.first);
+                },
+                style: SegmentedButton.styleFrom(
+                  minimumSize: const Size(0, 40), // Ensure consistent height
+                  maximumSize: const Size(double.infinity, 40),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
                 ),
-                ButtonSegment<StatsPeriod>(
-                  value: StatsPeriod.weekly,
-                  label: Text('Weekly'),
-                ),
-                ButtonSegment<StatsPeriod>(
-                  value: StatsPeriod.monthly,
-                  label: Text('Monthly'),
-                ),
-                ButtonSegment<StatsPeriod>(
-                  value: StatsPeriod.allTime,
-                  label: Text('All Time'),
-                ),
-              ],
-              selected: {statsProvider.currentPeriod},
-              onSelectionChanged: (Set<StatsPeriod> newSelection) {
-                statsProvider.setPeriod(newSelection.first);
-              },
+              ),
             ),
             
             const SizedBox(height: 16),
@@ -198,10 +242,16 @@ class StatisticsScreen extends StatelessWidget {
                         : null,
                     icon: const Icon(Icons.chevron_left),
                   ),
-                  Text(
-                    statsProvider.periodTitle,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
+                  Expanded(
+                    child: Text(
+                      statsProvider.periodTitle,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   IconButton(
@@ -218,7 +268,10 @@ class StatisticsScreen extends StatelessWidget {
                   statsProvider.periodTitle,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w500,
+                    fontSize: 14,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -246,8 +299,13 @@ class StatisticsScreen extends StatelessWidget {
                 ),
               );
             },
-            child: Card(
+            child: Container(
               key: ValueKey('total-time-${statsProvider.formattedTotalTime}'),
+              decoration: BoxDecoration(
+                gradient: AppColors.cardGradient,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: AppColors.cardShadow,
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -255,18 +313,28 @@ class StatisticsScreen extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(
-                          Icons.timer,
-                          color: Theme.of(context).colorScheme.primary,
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            gradient: AppColors.primaryGradient,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.timer,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 12),
                         Text(
                           'Total Time',
-                          style: Theme.of(context).textTheme.titleSmall,
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     Text(
                       statsProvider.formattedTotalTime,
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -295,8 +363,13 @@ class StatisticsScreen extends StatelessWidget {
                 ),
               );
             },
-            child: Card(
-              key: ValueKey('sessions-${statsProvider.totalSessions}'),
+            child: Container(
+              key: ValueKey('study-days-${statsProvider.studyDays}'),
+              decoration: BoxDecoration(
+                gradient: AppColors.accentGradient,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: AppColors.cardShadow,
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -304,22 +377,34 @@ class StatisticsScreen extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(
-                          Icons.task_alt,
-                          color: Theme.of(context).colorScheme.secondary,
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.calendar_today,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 12),
                         Text(
-                          'Sessions',
-                          style: Theme.of(context).textTheme.titleSmall,
+                          'Study Days',
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     Text(
-                      '${statsProvider.totalSessions}',
+                      '${statsProvider.studyDays}',
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
                   ],
@@ -344,60 +429,81 @@ class StatisticsScreen extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         
-        // Pie chart with proper spacing and animation
+        // Pie chart with matching layout to bar chart
         AnimatedContainer(
           duration: const Duration(milliseconds: 600),
           curve: Curves.easeInOut,
-          child: Card(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: AppColors.cardGradient,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: AppColors.cardShadow,
+            ),
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(20), // Same padding as bar chart
               child: Column(
                 children: [
-                  Text(
-                    'Study Time by Task',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          gradient: AppColors.primaryGradient,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Icon(
+                          Icons.pie_chart,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Study Time by Task',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 24), // Increased spacing
+                  const SizedBox(height: 24),
+                  // Container to match bar chart width exactly
                   Container(
-                    constraints: const BoxConstraints(
-                      maxHeight: 250, // Fixed height to prevent overlap
-                    ),
-                    child: AspectRatio(
-                      aspectRatio: 1.0, // Square aspect ratio
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 800),
-                        transitionBuilder: (child, animation) {
-                          return FadeTransition(
-                            opacity: animation,
-                            child: ScaleTransition(
-                              scale: animation,
-                              child: child,
+                    width: double.infinity, // Full width like bar chart
+                    height: 250, // Fixed height to match bar chart
+                    child: Center( // Center the pie chart
+                      child: AspectRatio(
+                        aspectRatio: 1.0, // Square aspect ratio
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 400), // Reduced duration for smoother feel
+                          transitionBuilder: (child, animation) {
+                            return FadeTransition(
+                              opacity: animation,
+                              child: child, // Removed scale transition for cleaner effect
+                            );
+                          },
+                          child: PieChart(
+                            key: ValueKey(statsProvider.currentPeriod),
+                            PieChartData(
+                              sections: _buildPieChartSections(context, statsProvider),
+                              borderData: FlBorderData(show: false),
+                              sectionsSpace: 3,
+                              centerSpaceRadius: 60,
+                              pieTouchData: PieTouchData(
+                                enabled: true,
+                                touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                                  _handlePieChartTouch(context, event, pieTouchResponse, statsProvider);
+                                },
+                              ),
                             ),
-                          );
-                        },
-                        child: PieChart(
-                          key: ValueKey(statsProvider.currentPeriod),
-                          PieChartData(
-                            sections: _buildPieChartSections(context, statsProvider),
-                            borderData: FlBorderData(show: false),
-                            sectionsSpace: 3,
-                            centerSpaceRadius: 60, // Slightly larger center space
-                            pieTouchData: PieTouchData(
-                              enabled: true,
-                              touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                                _handlePieChartTouch(context, event, pieTouchResponse, statsProvider);
-                              },
-                            ),
+                            duration: const Duration(milliseconds: 400), // Consistent with switcher
+                            curve: Curves.easeInOut, // Simpler curve
                           ),
-                          duration: const Duration(milliseconds: 800),
-                          curve: Curves.easeInOutCubic,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16), // Added bottom spacing
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
@@ -410,16 +516,38 @@ class StatisticsScreen extends StatelessWidget {
         AnimatedContainer(
           duration: const Duration(milliseconds: 600),
           curve: Curves.easeInOut,
-          child: Card(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: AppColors.cardGradient,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: AppColors.cardShadow,
+            ),
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  Text(
-                    'Study Time Comparison',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          gradient: AppColors.accentGradient,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Icon(
+                          Icons.bar_chart,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Study Time Comparison',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 24), // Increased spacing
                   SizedBox(

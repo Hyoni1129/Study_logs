@@ -47,6 +47,7 @@ class StatisticsProvider with ChangeNotifier {
   List<StudySession> _sessions = [];
   int _totalStudyTime = 0;
   int _totalSessions = 0;
+  int _studyDays = 0; // Number of unique days with study sessions
   
   // Getters
   StatsPeriod get currentPeriod => _currentPeriod;
@@ -57,6 +58,7 @@ class StatisticsProvider with ChangeNotifier {
   List<StudySession> get sessions => _sessions;
   int get totalStudyTime => _totalStudyTime;
   int get totalSessions => _totalSessions;
+  int get studyDays => _studyDays;
   
   // Formatted getters
   String get formattedTotalTime {
@@ -189,6 +191,9 @@ class StatisticsProvider with ChangeNotifier {
       _sessions = sessions;
       _totalSessions = sessions.length;
       _totalStudyTime = timePerTask.values.fold(0, (sum, time) => sum + time);
+      
+      // Calculate unique study days
+      _studyDays = _calculateStudyDays(sessions);
       
       // Get all tasks to create statistics
       final allTasks = await _databaseHelper.getAllTasks();
@@ -331,6 +336,18 @@ class StatisticsProvider with ChangeNotifier {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return months[month - 1];
+  }
+
+  // Calculate unique study days from sessions
+  int _calculateStudyDays(List<StudySession> sessions) {
+    final Set<String> uniqueDays = {};
+    
+    for (final session in sessions) {
+      final dateString = '${session.dateCreated.year}-${session.dateCreated.month.toString().padLeft(2, '0')}-${session.dateCreated.day.toString().padLeft(2, '0')}';
+      uniqueDays.add(dateString);
+    }
+    
+    return uniqueDays.length;
   }
 
   void _setLoading(bool loading) {

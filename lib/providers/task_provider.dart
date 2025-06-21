@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import '../models/task.dart';
 import '../services/database_helper.dart';
 
@@ -22,7 +23,7 @@ class TaskProvider with ChangeNotifier {
     try {
       _setLoading(true);
       _error = null;
-      _tasks = await _databaseHelper.getAllTasks();
+      _tasks = await _databaseHelper.getAllTasksWithTotalTimes();
       notifyListeners();
     } catch (e) {
       _error = 'Failed to load tasks: $e';
@@ -171,6 +172,29 @@ class TaskProvider with ChangeNotifier {
       }
       
       notifyListeners();
+    }
+  }
+  
+  // Refresh tasks from database (to get updated total times)
+  Future<void> refreshTasks() async {
+    try {
+      final refreshedTasks = await _databaseHelper.getAllTasksWithTotalTimes();
+      _tasks = refreshedTasks;
+      _tasks.sort((a, b) => a.name.compareTo(b.name));
+      
+      // Update selected task if it exists
+      if (_selectedTask != null) {
+        final updatedSelectedTask = _tasks.firstWhere(
+          (task) => task.id == _selectedTask!.id,
+          orElse: () => _selectedTask!,
+        );
+        _selectedTask = updatedSelectedTask;
+      }
+      
+      notifyListeners();
+    } catch (e) {
+      // Silently handle refresh errors
+      debugPrint('Failed to refresh tasks: $e');
     }
   }
 

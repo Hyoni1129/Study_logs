@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/timer_provider.dart';
+import '../utils/app_colors.dart';
 import 'circular_timer_progress.dart';
 
 class TimerDisplay extends StatelessWidget {
@@ -13,56 +14,61 @@ class TimerDisplay extends StatelessWidget {
         return Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
+            gradient: AppColors.cardGradient,
             borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context).colorScheme.shadow.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
-              ),
-            ],
+            boxShadow: AppColors.cardShadow,
           ),
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(16.0), // Reduced padding
             child: LayoutBuilder(
               builder: (context, constraints) {
-                // Calculate responsive sizes
-                final maxCircularSize = constraints.maxWidth * 0.65;
-                final circularSize = maxCircularSize.clamp(200.0, 280.0);
+                // Calculate responsive sizes based on available space
+                final availableHeight = constraints.maxHeight;
+                final maxCircularSize = constraints.maxWidth * 0.6; // Reduced from 0.65
+                final circularSize = maxCircularSize.clamp(180.0, 240.0); // Reduced max size
                 
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Timer type indicator
+                return SingleChildScrollView( // Add scroll capability
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: availableHeight,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                    // Timer type indicator - ultra compact
                     AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3), // Even more compact
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(10), // Smaller radius
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             timerProvider.currentPhaseIcon,
-                            style: const TextStyle(fontSize: 16),
+                            style: const TextStyle(fontSize: 12), // Even smaller icon
                           ),
-                          const SizedBox(width: 6),
-                          Text(
-                            timerProvider.currentPhaseDescription,
-                            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onPrimaryContainer,
-                              fontWeight: FontWeight.w600,
+                          const SizedBox(width: 3), // Minimal spacing
+                          Flexible(
+                            child: Text(
+                              timerProvider.currentPhaseDescription,
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 11, // Smaller font
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       ),
                     ),
                     
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 12), // Further reduced spacing
                     
                     // Circular timer display for Pomodoro
                     if (timerProvider.timerType == TimerType.pomodoro)
@@ -108,13 +114,18 @@ class TimerDisplay extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 8),
-                                // Phase indicator
-                                Text(
-                                  'Round ${timerProvider.pomodoroRounds + 1}',
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                                    fontWeight: FontWeight.w500,
+                                const SizedBox(height: 4), // Minimal spacing
+                                // Phase indicator - ultra compact
+                                Flexible(
+                                  child: Text(
+                                    'Round ${timerProvider.pomodoroRounds + 1}',
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 11, // Even smaller font size
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                               ],
@@ -209,6 +220,8 @@ class TimerDisplay extends StatelessWidget {
                       ),
                     ],
                   ],
+                ),
+                ),
                 );
               },
             ),

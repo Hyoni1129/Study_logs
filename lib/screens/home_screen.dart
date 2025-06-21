@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/task_provider.dart';
 import '../providers/timer_provider.dart';
 import '../providers/statistics_provider.dart';
+import '../utils/app_colors.dart';
 import 'timer_screen.dart';
 import 'tasks_screen.dart';
 import 'statistics_screen.dart';
@@ -67,9 +68,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     await taskProvider.initialize();
     await statisticsProvider.initialize();
     
-    // Set up callback for automatic statistics refresh after session save
+    // Set up callback for automatic refresh after session save
     timerProvider.setSessionSavedCallback(() {
       statisticsProvider.refresh();
+      taskProvider.refreshTasks(); // Refresh tasks to update total times
     });
   }
 
@@ -94,34 +96,39 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: PageView.builder(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        itemCount: _screens.length,
-        itemBuilder: (context, index) {
-          return AnimatedBuilder(
-            animation: _tabAnimation,
-            builder: (context, child) {
-              return FadeTransition(
-                opacity: _tabAnimation,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, 0.1),
-                    end: Offset.zero,
-                  ).animate(_tabAnimation),
-                  child: _screens[index],
-                ),
-              );
-            },
-          );
-        },
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: AppColors.backgroundGradient,
       ),
-      bottomNavigationBar: Container(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: PageView.builder(
+          controller: _pageController,
+          onPageChanged: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          itemCount: _screens.length,
+          itemBuilder: (context, index) {
+            return AnimatedBuilder(
+              animation: _tabAnimation,
+              builder: (context, child) {
+                return FadeTransition(
+                  opacity: _tabAnimation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0, 0.1),
+                      end: Offset.zero,
+                    ).animate(_tabAnimation),
+                    child: _screens[index],
+                  ),
+                );
+              },
+            );
+          },
+        ),
+        bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
@@ -156,6 +163,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               label: 'Statistics',
             ),
           ],
+        ),
         ),
       ),
     );

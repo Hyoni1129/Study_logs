@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // For clipboard functionality
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/timer_provider.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  bool _isDialogShowing = false; // Track dialog state
 
   @override
   Widget build(BuildContext context) {
@@ -271,7 +279,7 @@ class SettingsScreen extends StatelessWidget {
           
           // Developer Name
           Text(
-            'Hyoni',
+            'JeongHan Lee',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.onSurface,
@@ -391,7 +399,7 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Future<void> _launchGitHub() async {
-    final Uri url = Uri.parse('https://github.com/Hyoni1129');
+    final Uri url = Uri.parse('https://github.com/JeongHanLee');
     if (!await launchUrl(url)) {
       // Handle error - could show a snackbar
       debugPrint('Could not launch $url');
@@ -399,7 +407,7 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Future<void> _launchSponsor() async {
-    final Uri url = Uri.parse('https://github.com/sponsors/Hyoni1129');
+    final Uri url = Uri.parse('https://github.com/sponsors/JeongHanLee');
     if (!await launchUrl(url)) {
       // Handle error - could show a snackbar
       debugPrint('Could not launch $url');
@@ -407,6 +415,9 @@ class SettingsScreen extends StatelessWidget {
   }
 
   void _showFeedbackDialog(BuildContext context) {
+    if (_isDialogShowing) return; // Prevent duplicate dialogs
+    
+    _isDialogShowing = true;
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -446,6 +457,24 @@ class SettingsScreen extends StatelessWidget {
                         ),
                       ),
                     ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.copy,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 18,
+                      ),
+                      onPressed: () {
+                        Clipboard.setData(const ClipboardData(text: 'Team.Stella.Global@gmail.com'));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('Email copied to clipboard!'),
+                            duration: const Duration(seconds: 2),
+                            backgroundColor: Theme.of(context).colorScheme.primary,
+                          ),
+                        );
+                      },
+                      tooltip: 'Copy email address',
+                    ),
                   ],
                 ),
               ),
@@ -453,13 +482,18 @@ class SettingsScreen extends StatelessWidget {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _isDialogShowing = false; // Reset flag when dialog closes
+              },
               child: const Text('Close'),
             ),
           ],
         );
       },
-    );
+    ).then((_) {
+      _isDialogShowing = false; // Reset flag when dialog closes
+    });
   }
 
   Widget _buildSliderTile(

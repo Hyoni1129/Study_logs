@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import '../providers/task_provider.dart';
+import '../utils/app_colors.dart';
 
 class TasksScreen extends StatelessWidget {
   const TasksScreen({super.key});
@@ -124,10 +125,11 @@ class TasksScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: AppColors.cardGradient,
                       borderRadius: BorderRadius.circular(12),
+                      boxShadow: AppColors.cardShadow,
                     ),
                     child: ListTile(
                       contentPadding: const EdgeInsets.all(16),
@@ -135,12 +137,12 @@ class TasksScreen extends StatelessWidget {
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primaryContainer,
+                          gradient: AppColors.primaryGradient,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
                           Icons.task_alt,
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          color: Colors.white,
                         ),
                       ),
                       title: Text(

@@ -278,7 +278,7 @@ class SettingsScreen extends StatelessWidget {
           
           // Developer Name
           Text(
-            'Hyoni',
+            'JeongHan Lee',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.onSurface,
@@ -352,10 +352,10 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Future<void> _launchGitHub() async {
-    final Uri url = Uri.parse('https://github.com/Hyoni1129');
+    final Uri url = Uri.parse('https://github.com/JeongHanLee');
     if (!await launchUrl(url)) {
-      // Handle error - could show a snackbar or copy to clipboard
-      print('Could not launch $url');
+      // Handle error silently for production
+      debugPrint('Could not launch $url');
     }
   }
 
