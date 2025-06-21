@@ -120,15 +120,6 @@ class TimerDisplay extends StatelessWidget {
                           ],
                         ),
                       ),
-                  ],
-                );
-              },
-            ),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
                     
                     // Timer state indicator
                     const SizedBox(height: 16),

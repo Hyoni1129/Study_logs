@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/task_provider.dart';
-import '../providers/timer_provider.dart';
 import '../providers/statistics_provider.dart';
+import '../utils/app_theme.dart';
 import 'timer_screen.dart';
 import 'tasks_screen.dart';
 import 'statistics_screen.dart';
@@ -64,8 +64,8 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Timer',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.task_alt_outlined),
-            activeIcon: Icon(Icons.task_alt),
+            icon: Icon(Icons.assignment_outlined),
+            activeIcon: Icon(Icons.assignment),
             label: 'Tasks',
           ),
           BottomNavigationBarItem(

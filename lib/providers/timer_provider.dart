@@ -5,6 +5,7 @@ import '../models/task.dart';
 import '../services/database_helper.dart';
 import '../services/notification_service.dart';
 import '../services/audio_service.dart';
+import '../services/haptic_service.dart';
 
 enum TimerType { stopwatch, pomodoro }
 enum TimerState { stopped, running, paused }
@@ -14,6 +15,7 @@ class TimerProvider with ChangeNotifier {
   final DatabaseHelper _databaseHelper = DatabaseHelper();
   final NotificationService _notificationService = NotificationService();
   final AudioService _audioService = AudioService();
+  final HapticService _hapticService = HapticService();
   
   // Timer state
   TimerType _timerType = TimerType.stopwatch;
@@ -125,8 +127,9 @@ class TimerProvider with ChangeNotifier {
       _setupTimerForType();
     }
     
-    // Play start sound
+    // Play start sound and haptic feedback
     await _audioService.playStartSound();
+    await _hapticService.heavyImpact();
     
     _startTick();
     _clearError();
@@ -134,12 +137,16 @@ class TimerProvider with ChangeNotifier {
   }
 
   // Pause timer
-  void pauseTimer() {
+  Future<void> pauseTimer() async {
     if (_timerState != TimerState.running) return;
     
     _timerState = TimerState.paused;
     _pausedTime = DateTime.now();
     _timer?.cancel();
+    
+    // Provide haptic feedback
+    await _hapticService.mediumImpact();
+    
     notifyListeners();
   }
 
@@ -149,8 +156,9 @@ class TimerProvider with ChangeNotifier {
     
     _timer?.cancel();
     
-    // Play stop sound
+    // Play stop sound and haptic feedback
     await _audioService.playStopSound();
+    await _hapticService.heavyImpact();
     
     // Save session if there was actual time elapsed
     if (_elapsedSeconds > 0 && _selectedTask != null) {
