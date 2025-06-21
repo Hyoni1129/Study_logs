@@ -23,7 +23,7 @@ class TimerDisplay extends StatelessWidget {
             ],
           ),
           child: Padding(
-            padding: const EdgeInsets.all(24.0), // Reduced padding
+            padding: const EdgeInsets.all(20.0), // Further reduced padding
             child: LayoutBuilder(
               builder: (context, constraints) {
                 return Column(
@@ -46,24 +46,26 @@ class TimerDisplay extends StatelessWidget {
                       ),
                     ),
                     
-                    const SizedBox(height: 16), // Reduced spacing
+                    const SizedBox(height: 12), // Reduced spacing
                     
                     // Main timer display
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        timerProvider.formattedElapsedTime,
-                        style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                          fontWeight: FontWeight.w300,
-                          letterSpacing: -2,
-                          color: Theme.of(context).colorScheme.onSurface,
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          timerProvider.formattedElapsedTime,
+                          style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                            fontWeight: FontWeight.w300,
+                            letterSpacing: -2,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                         ),
                       ),
                     ),
                     
                     // Pomodoro specific info
                     if (timerProvider.timerType == TimerType.pomodoro) ...[
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8), // Reduced spacing
                       
                       // Progress bar
                       LinearProgressIndicator(
@@ -72,40 +74,47 @@ class TimerDisplay extends StatelessWidget {
                         valueColor: AlwaysStoppedAnimation<Color>(
                           _getProgressColor(context, timerProvider.pomodoroPhase),
                         ),
-                        minHeight: 6,
+                        minHeight: 4, // Reduced height
                       ),
                       
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6), // Reduced spacing
                       
-                      // Remaining time
-                      Text(
-                        'Remaining: ${timerProvider.formattedRemainingTime}',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 6),
-                      
-                      // Pomodoro rounds
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.secondaryContainer,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          'Round ${timerProvider.pomodoroRounds + 1}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSecondaryContainer,
-                            fontWeight: FontWeight.w500,
+                      // Compact info row
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          // Remaining time
+                          Flexible(
+                            child: Text(
+                              'Remaining: ${timerProvider.formattedRemainingTime}',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 8),
+                          // Pomodoro rounds
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), // Reduced padding
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.secondaryContainer,
+                              borderRadius: BorderRadius.circular(6), // Reduced radius
+                            ),
+                            child: Text(
+                              'Round ${timerProvider.pomodoroRounds + 1}',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onSecondaryContainer,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                     
                     // Timer state indicator
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12), // Reduced spacing
                     
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -129,7 +138,7 @@ class TimerDisplay extends StatelessWidget {
                     
                     // Selected task info
                     if (timerProvider.selectedTask != null) ...[
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8), // Reduced spacing
                       Text(
                         'Task: ${timerProvider.selectedTask!.name}',
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(

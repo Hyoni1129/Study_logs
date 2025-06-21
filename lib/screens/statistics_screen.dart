@@ -98,27 +98,45 @@ class StatisticsScreen extends StatelessWidget {
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Period selector
-                _buildPeriodSelector(context, statsProvider),
-                
-                const SizedBox(height: 24),
-                
-                // Summary cards
-                _buildSummaryCards(context, statsProvider),
-                
-                const SizedBox(height: 24),
-                
-                // Charts
-                _buildChartsSection(context, statsProvider),
-                
-                const SizedBox(height: 24),
-                
-                // Task breakdown
-                _buildTaskBreakdown(context, statsProvider),
-              ],
+            child: AnimatedBuilder(
+              animation: ModalRoute.of(context)?.animation ?? kAlwaysCompleteAnimation,
+              builder: (context, child) {
+                final animation = ModalRoute.of(context)?.animation ?? kAlwaysCompleteAnimation;
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0, 0.1),
+                      end: Offset.zero,
+                    ).animate(CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeOutCubic,
+                    )),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Period selector
+                        _buildPeriodSelector(context, statsProvider),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // Summary cards
+                        _buildSummaryCards(context, statsProvider),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // Charts
+                        _buildChartsSection(context, statsProvider),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // Task breakdown
+                        _buildTaskBreakdown(context, statsProvider),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           );
         },
@@ -326,113 +344,169 @@ class StatisticsScreen extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         
-        // Pie chart
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Text(
-                  'Study Time by Task',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+        // Pie chart with proper spacing and animation
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeInOut,
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  Text(
+                    'Study Time by Task',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  height: 200,
-                  child: PieChart(
-                    PieChartData(
-                      sections: _buildPieChartSections(context, statsProvider),
-                      borderData: FlBorderData(show: false),
-                      sectionsSpace: 2,
-                      centerSpaceRadius: 50,
-                      pieTouchData: PieTouchData(
-                        enabled: true,
-                        touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                          _handlePieChartTouch(context, event, pieTouchResponse, statsProvider);
+                  const SizedBox(height: 24), // Increased spacing
+                  Container(
+                    constraints: const BoxConstraints(
+                      maxHeight: 250, // Fixed height to prevent overlap
+                    ),
+                    child: AspectRatio(
+                      aspectRatio: 1.0, // Square aspect ratio
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 800),
+                        transitionBuilder: (child, animation) {
+                          return FadeTransition(
+                            opacity: animation,
+                            child: ScaleTransition(
+                              scale: animation,
+                              child: child,
+                            ),
+                          );
                         },
+                        child: PieChart(
+                          key: ValueKey(statsProvider.currentPeriod),
+                          PieChartData(
+                            sections: _buildPieChartSections(context, statsProvider),
+                            borderData: FlBorderData(show: false),
+                            sectionsSpace: 3,
+                            centerSpaceRadius: 60, // Slightly larger center space
+                            pieTouchData: PieTouchData(
+                              enabled: true,
+                              touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                                _handlePieChartTouch(context, event, pieTouchResponse, statsProvider);
+                              },
+                            ),
+                          ),
+                          duration: const Duration(milliseconds: 800),
+                          curve: Curves.easeInOutCubic,
+                        ),
                       ),
                     ),
-                    duration: const Duration(milliseconds: 600),
-                    curve: Curves.easeInOutCubic,
                   ),
-                ),
-              ],
+                  const SizedBox(height: 16), // Added bottom spacing
+                ],
+              ),
             ),
           ),
         ),
         
-        const SizedBox(height: 16),
+        const SizedBox(height: 20), // Increased spacing between charts
         
-        // Bar chart
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Text(
-                  'Study Time Comparison',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+        // Bar chart with animation
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeInOut,
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  Text(
+                    'Study Time Comparison',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  height: 200,
-                  child: BarChart(
-                    BarChartData(
-                      alignment: BarChartAlignment.spaceAround,
-                      maxY: _getMaxY(statsProvider),
-                      barTouchData: BarTouchData(
-                        enabled: true,
-                        touchCallback: (FlTouchEvent event, barTouchResponse) {
-                          _handleBarChartTouch(context, event, barTouchResponse, statsProvider);
-                        },
-                      ),
-                      titlesData: FlTitlesData(
-                        show: true,
-                        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                        bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            getTitlesWidget: (value, meta) {
-                              final index = value.toInt();
-                              if (index >= 0 && index < statsProvider.taskStatistics.length) {
-                                final taskName = statsProvider.taskStatistics[index].task.name;
-                                return SideTitleWidget(
-                                  axisSide: meta.axisSide,
-                                  child: Text(
-                                    taskName.length > 8 ? '${taskName.substring(0, 8)}...' : taskName,
-                                    style: Theme.of(context).textTheme.bodySmall,
-                                  ),
-                                );
-                              }
-                              return const Text('');
+                  const SizedBox(height: 24), // Increased spacing
+                  SizedBox(
+                    height: 250, // Fixed height
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 800),
+                      transitionBuilder: (child, animation) {
+                        return FadeTransition(
+                          opacity: animation,
+                          child: SlideTransition(
+                            position: Tween<Offset>(
+                              begin: const Offset(0, 0.3),
+                              end: Offset.zero,
+                            ).animate(animation),
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: BarChart(
+                        key: ValueKey('${statsProvider.currentPeriod}_bar'),
+                        BarChartData(
+                          alignment: BarChartAlignment.spaceAround,
+                          maxY: _getMaxY(statsProvider),
+                          barTouchData: BarTouchData(
+                            enabled: true,
+                            touchCallback: (FlTouchEvent event, barTouchResponse) {
+                              _handleBarChartTouch(context, event, barTouchResponse, statsProvider);
                             },
                           ),
-                        ),
-                        leftTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            getTitlesWidget: (value, meta) {
-                              return Text(
-                                '${(value / 3600).toStringAsFixed(0)}h',
-                                style: Theme.of(context).textTheme.bodySmall,
+                          titlesData: FlTitlesData(
+                            show: true,
+                            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                            bottomTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                reservedSize: 30,
+                                getTitlesWidget: (value, meta) {
+                                  final index = value.toInt();
+                                  if (index >= 0 && index < statsProvider.taskStatistics.length) {
+                                    final taskName = statsProvider.taskStatistics[index].task.name;
+                                    return SideTitleWidget(
+                                      axisSide: meta.axisSide,
+                                      child: Text(
+                                        taskName.length > 8 ? '${taskName.substring(0, 8)}...' : taskName,
+                                        style: Theme.of(context).textTheme.bodySmall,
+                                      ),
+                                    );
+                                  }
+                                  return const Text('');
+                                },
+                              ),
+                            ),
+                            leftTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                reservedSize: 40,
+                                getTitlesWidget: (value, meta) {
+                                  return Text(
+                                    '${(value / 3600).toStringAsFixed(0)}h',
+                                    style: Theme.of(context).textTheme.bodySmall,
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                          borderData: FlBorderData(show: false),
+                          barGroups: _buildBarChartGroups(context, statsProvider),
+                          gridData: FlGridData(
+                            show: true,
+                            drawVerticalLine: false,
+                            horizontalInterval: _getMaxY(statsProvider) / 5,
+                            getDrawingHorizontalLine: (value) {
+                              return FlLine(
+                                color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                                strokeWidth: 1,
                               );
                             },
                           ),
                         ),
+                        duration: const Duration(milliseconds: 800),
+                        curve: Curves.easeInOutCubic,
                       ),
-                      borderData: FlBorderData(show: false),
-                      barGroups: _buildBarChartGroups(context, statsProvider),
                     ),
-                    duration: const Duration(milliseconds: 600),
-                    curve: Curves.easeInOutCubic,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

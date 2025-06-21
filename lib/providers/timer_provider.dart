@@ -29,6 +29,10 @@ class TimerProvider with ChangeNotifier {
   DateTime? _pausedTime;
   Timer? _timer;
   
+  // Daily time tracking
+  int _todayStudyTime = 0; // Total study time for today in seconds
+  DateTime _lastResetDate = DateTime.now();
+  
   // Pomodoro specific
   PomodoroPhase _pomodoroPhase = PomodoroPhase.focus;
   int _pomodoroRounds = 0;
@@ -42,6 +46,11 @@ class TimerProvider with ChangeNotifier {
   
   // Error handling
   String? _error;
+
+  // Initialize and load today's study time
+  TimerProvider() {
+    _loadTodayStudyTime();
+  }
 
   // Getters
   TimerType get timerType => _timerType;
@@ -81,6 +90,36 @@ class TimerProvider with ChangeNotifier {
   String get formattedElapsedTime => _formatTime(_elapsedSeconds);
   String get formattedRemainingTime => _formatTime(remainingSeconds);
   String get formattedTargetTime => _formatTime(_targetSeconds);
+  
+  // Daily time tracking
+  int get todayStudyTime => _todayStudyTime;
+  String get formattedTodayTime => _formatTime(_todayStudyTime);
+  
+  // Check if we need to reset daily time (new day)
+  void _checkDailyReset() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final lastReset = DateTime(_lastResetDate.year, _lastResetDate.month, _lastResetDate.day);
+    
+    if (today.isAfter(lastReset)) {
+      _todayStudyTime = 0;
+      _lastResetDate = now;
+    }
+  }
+
+  // Load today's study time from database
+  Future<void> _loadTodayStudyTime() async {
+    try {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final timeMap = await _databaseHelper.getDailyTimePerTask(today);
+      _todayStudyTime = timeMap.values.fold(0, (sum, time) => sum + time);
+      _lastResetDate = now;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error loading today\'s study time: $e');
+    }
+  }
 
   // Set timer type
   void setTimerType(TimerType type) {
@@ -111,6 +150,8 @@ class TimerProvider with ChangeNotifier {
 
   // Start timer
   Future<void> startTimer() async {
+    _checkDailyReset(); // Check if we need to reset daily time
+    
     if (_selectedTask == null) {
       _error = 'Please select a task before starting the timer';
       notifyListeners();
@@ -126,7 +167,8 @@ class TimerProvider with ChangeNotifier {
       // Resuming from pause
       _pausedTime = null;
     } else {
-      // Starting fresh
+      // Starting fresh - reset elapsed time and setup timer
+      _elapsedSeconds = 0;
       _setupTimerForType();
     }
     
@@ -167,6 +209,9 @@ class TimerProvider with ChangeNotifier {
     if (_elapsedSeconds > 0 && _selectedTask != null) {
       await _saveStudySession();
       
+      // Add to daily time but don't reset the timer display immediately
+      _todayStudyTime += _elapsedSeconds;
+      
       // Show completion notification
       await _notificationService.showStudySessionCompleteNotification(
         taskName: _selectedTask!.name,
@@ -174,7 +219,12 @@ class TimerProvider with ChangeNotifier {
       );
     }
     
-    _resetTimer();
+    // Don't reset timer immediately - let it show the completed time
+    _timer?.cancel();
+    _timerState = TimerState.stopped;
+    _startTime = null;
+    _pausedTime = null;
+    
     notifyListeners();
   }
 
@@ -183,7 +233,7 @@ class TimerProvider with ChangeNotifier {
     switch (_timerType) {
       case TimerType.stopwatch:
         _targetSeconds = 0; // Infinite for stopwatch
-        _elapsedSeconds = 0;
+        // Don't reset _elapsedSeconds here - it's handled in startTimer
         break;
       case TimerType.pomodoro:
         _setupPomodoroTimer();

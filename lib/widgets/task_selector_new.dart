@@ -222,6 +222,36 @@ class _TaskSelectorState extends State<TaskSelector> with SingleTickerProviderSt
                                             }
                                           },
                                   ),
+                                  
+                                  // Timer type selector
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'Timer Type',
+                                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  SegmentedButton<TimerType>(
+                                    segments: const [
+                                      ButtonSegment<TimerType>(
+                                        value: TimerType.stopwatch,
+                                        label: Text('Stopwatch'),
+                                        icon: Icon(Icons.timer_outlined),
+                                      ),
+                                      ButtonSegment<TimerType>(
+                                        value: TimerType.pomodoro,
+                                        label: Text('Pomodoro'),
+                                        icon: Icon(Icons.access_time),
+                                      ),
+                                    ],
+                                    selected: {timerProvider.timerType},
+                                    onSelectionChanged: timerProvider.isRunning 
+                                        ? null 
+                                        : (Set<TimerType> selection) {
+                                            timerProvider.setTimerType(selection.first);
+                                          },
+                                  ),
                                 ],
                               ),
                             ),

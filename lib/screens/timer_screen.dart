@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/timer_provider.dart';
 import '../widgets/task_selector.dart';
 import '../widgets/timer_display.dart';
 import '../widgets/timer_controls.dart';
@@ -14,7 +12,7 @@ class TimerScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Study Timer',
+          'Study Log',
           style: TextStyle(
             fontWeight: FontWeight.w600,
           ),

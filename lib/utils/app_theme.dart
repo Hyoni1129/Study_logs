@@ -19,7 +19,7 @@ class AppIcons {
 }
 
 class AppTheme {
-  static const Color primaryBlue = Color(0xFF007AFF);
+  static const Color primaryBlue = Color(0xFF40a9da); // Updated to brand color
   static const Color primaryGreen = Color(0xFF34C759);
   static const Color primaryRed = Color(0xFFFF3B30);
   static const Color primaryOrange = Color(0xFFFF9500);

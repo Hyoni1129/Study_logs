@@ -27,13 +27,17 @@ class TimerDisplay extends StatelessWidget {
             padding: const EdgeInsets.all(24.0),
             child: LayoutBuilder(
               builder: (context, constraints) {
-                return SingleChildScrollView(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
+                // Calculate responsive sizes
+                final maxCircularSize = constraints.maxWidth * 0.65;
+                final circularSize = maxCircularSize.clamp(200.0, 280.0);
+                
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                     // Timer type indicator
-                    Container(
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.primaryContainer,
@@ -58,51 +62,64 @@ class TimerDisplay extends StatelessWidget {
                       ),
                     ),
                     
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
                     
                     // Circular timer display for Pomodoro
                     if (timerProvider.timerType == TimerType.pomodoro)
-                      CircularTimerProgress(
-                        progress: timerProvider.progress,
-                        progressColor: _getProgressColor(context, timerProvider.pomodoroPhase),
-                        backgroundColor: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-                        strokeWidth: 8.0,
-                        size: constraints.maxWidth * 0.7,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // Main timer display with smooth animation
-                            AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 300),
-                              transitionBuilder: (child, animation) {
-                                return FadeTransition(
-                                  opacity: animation,
-                                  child: child,
-                                );
-                              },
-                              child: FittedBox(
-                                key: ValueKey(timerProvider.formattedTimeRemaining),
-                                fit: BoxFit.scaleDown,
-                                child: Text(
-                                  timerProvider.formattedTimeRemaining,
-                                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                                    fontWeight: FontWeight.w300,
-                                    letterSpacing: -1,
-                                    color: Theme.of(context).colorScheme.onSurface,
+                      Container(
+                        constraints: BoxConstraints(
+                          maxWidth: circularSize,
+                          maxHeight: circularSize,
+                        ),
+                        child: CircularTimerProgress(
+                          progress: timerProvider.progress,
+                          progressColor: _getProgressColor(context, timerProvider.pomodoroPhase),
+                          backgroundColor: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                          strokeWidth: 8.0,
+                          size: circularSize,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Main timer display with smooth animation
+                                Flexible(
+                                  child: AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 300),
+                                    transitionBuilder: (child, animation) {
+                                      return FadeTransition(
+                                        opacity: animation,
+                                        child: child,
+                                      );
+                                    },
+                                    child: FittedBox(
+                                      key: ValueKey(timerProvider.formattedTimeRemaining),
+                                      fit: BoxFit.scaleDown,
+                                      child: Text(
+                                        timerProvider.formattedTimeRemaining,
+                                        style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                                          fontWeight: FontWeight.w300,
+                                          letterSpacing: -1,
+                                          color: Theme.of(context).colorScheme.onSurface,
+                                          fontSize: circularSize * 0.15, // Responsive font size
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
+                                const SizedBox(height: 8),
+                                // Phase indicator
+                                Text(
+                                  'Round ${timerProvider.pomodoroRounds + 1}',
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 8),
-                            // Phase indicator
-                            Text(
-                              'Round ${timerProvider.pomodoroRounds + 1}',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       )
                     
@@ -172,8 +189,26 @@ class TimerDisplay extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
+                    
+                    // Show today's total time when stopped
+                    if (timerProvider.isStopped && timerProvider.todayStudyTime > 0) ...[
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          'Today: ${timerProvider.formattedTodayTime}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
-                  ),
                 );
               },
             ),
