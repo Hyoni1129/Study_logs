@@ -14,6 +14,16 @@
 
 **Study Logs** is a beautifully designed iOS study tracker that empowers users to monitor their study habits through stopwatch and Pomodoro timers. Built with Flutter, it provides elegant Apple-style data visualizations to help users understand their study patterns and stay motivated.
 
+## 📱 Screenshots
+
+<div align="center">
+  <img src="Log_Main.png" alt="Main Timer Interface" width="300" style="margin: 10px;">
+  <img src="Statistics_Main.png" alt="Statistics Overview" width="300" style="margin: 10px;">
+  <img src="Statistics_Bottom.png" alt="Weekly Consistency Chart" width="300" style="margin: 10px;">
+</div>
+
+*From left to right: Main timer interface with task selection and Pomodoro controls, comprehensive statistics with interactive charts, and weekly study consistency tracking*
+
 ## ✨ Features
 
 ### 📋 Task Management

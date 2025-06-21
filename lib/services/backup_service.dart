@@ -48,21 +48,21 @@ class BackupService {
       final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-').split('.')[0];
       final filename = 'studylogs_backup_$timestamp.json';
       
+      // Convert string to bytes for mobile platforms
+      final bytes = utf8.encode(jsonString);
+      
       // Let user choose where to save the file
       String? outputFile = await FilePicker.platform.saveFile(
         dialogTitle: 'Save backup file',
         fileName: filename,
         type: FileType.custom,
         allowedExtensions: ['json'],
+        bytes: bytes,
       );
 
       if (outputFile == null) {
         return null; // User cancelled
       }
-
-      // Write file to selected location
-      final file = File(outputFile);
-      await file.writeAsString(jsonString);
       
       return outputFile;
     } catch (e) {
