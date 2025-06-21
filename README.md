@@ -3,7 +3,7 @@
 <div align="center">
   <img src="assets/icons/app_icon.png" alt="Study Logs Icon" width="120" height="120">
   
-  <p><em>Track your study habits with elegant, Apple-style design</em></p>
+  <p><em>Track your study habits with elegant, Stella-style design</em></p>
   
   [![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
   [![iOS](https://img.shields.io/badge/iOS-000000?style=for-the-badge&logo=ios&logoColor=white)](https://www.apple.com/ios)
