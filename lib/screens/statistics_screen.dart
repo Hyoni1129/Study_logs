@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../providers/statistics_provider.dart';
 import '../utils/app_colors.dart';
+import '../widgets/weekly_consistency_chart.dart';
 
 class StatisticsScreen extends StatelessWidget {
   const StatisticsScreen({super.key});
@@ -133,6 +134,11 @@ class StatisticsScreen extends StatelessWidget {
                         
                         // Task breakdown
                         _buildTaskBreakdown(context, statsProvider),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // Weekly consistency chart at the bottom
+                        const WeeklyConsistencyChart(),
                       ],
                     ),
                   ),

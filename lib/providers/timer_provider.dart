@@ -285,9 +285,10 @@ class TimerProvider with ChangeNotifier {
       await _audioService.playFocusCompleteSound();
       await _notificationService.showPomodoroFocusCompleteNotification();
       
+      // Increment rounds after focus session completion
       _pomodoroRounds++;
       
-      // Determine next phase
+      // Determine next phase based on rounds completed
       if (_pomodoroRounds % _longBreakInterval == 0) {
         _pomodoroPhase = PomodoroPhase.longBreak;
       } else {
@@ -305,6 +306,7 @@ class TimerProvider with ChangeNotifier {
     _setupPomodoroTimer();
     _startTime = null;
     _pausedTime = null;
+    
     notifyListeners();
   }
 

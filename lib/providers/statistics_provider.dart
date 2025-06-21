@@ -350,6 +350,43 @@ class StatisticsProvider with ChangeNotifier {
     return uniqueDays.length;
   }
 
+  // Get weekly study consistency data (current week only)
+  Future<List<bool>> getCurrentWeekConsistency() async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    
+    // Get the start of current week (Monday)
+    final weekStart = today.subtract(Duration(days: today.weekday - 1));
+    final weekData = <bool>[];
+    
+    // Check each day of the current week
+    for (int dayOffset = 0; dayOffset < 7; dayOffset++) {
+      final day = weekStart.add(Duration(days: dayOffset));
+      // Don't show future days as active
+      if (day.isAfter(today)) {
+        weekData.add(false);
+      } else {
+        final sessions = await _getSessionsForDay(day);
+        weekData.add(sessions.isNotEmpty);
+      }
+    }
+    
+    return weekData;
+  }
+
+  // Get current week label
+  String getCurrentWeekLabel() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final weekStart = today.subtract(Duration(days: today.weekday - 1));
+    
+    // Get week number in month
+    final weekOfMonth = ((weekStart.day - 1) ~/ 7) + 1;
+    
+    final monthName = _formatDate(weekStart, 'MMM');
+    return 'Week $weekOfMonth of $monthName';
+  }
+
   void _setLoading(bool loading) {
     _isLoading = loading;
     if (loading) {

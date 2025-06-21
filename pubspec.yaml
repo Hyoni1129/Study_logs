@@ -58,6 +58,11 @@ dependencies:
   # Utilities
   intl: ^0.19.0
   shared_preferences: ^2.3.2
+  
+  # File handling for backup/restore
+  file_picker: ^8.0.7
+  path_provider: ^2.1.4
+  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:

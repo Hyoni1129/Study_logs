@@ -145,4 +145,3 @@ The app is fully functional and ready for user testing with professional-grade f
 ---
 
 *Study Logs helps you build better study habits with beautiful, intuitive design and powerful tracking features.*
-# Study_logs

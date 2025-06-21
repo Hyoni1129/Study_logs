@@ -3,6 +3,8 @@ import 'package:flutter/services.dart'; // For clipboard functionality
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/timer_provider.dart';
+import '../services/backup_service.dart';
+import 'onboarding_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -106,8 +108,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               // Data Settings
               _buildSectionCard(
                 context,
-                'Data & Statistics',
-                Icons.analytics_outlined,
+                'Data & Backup',
+                Icons.backup_outlined,
                 [
                   _buildActionTile(
                     context,
@@ -121,16 +123,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _buildActionTile(
                     context,
                     'Export Data',
-                    'Export your study sessions',
-                    Icons.download_outlined,
-                    () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Export feature coming soon!'),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    },
+                    'Backup your study sessions',
+                    Icons.cloud_download_outlined,
+                    () => _exportData(context),
+                  ),
+                  _buildActionTile(
+                    context,
+                    'Import Data',
+                    'Restore from backup file',
+                    Icons.cloud_upload_outlined,
+                    () => _importData(context),
                   ),
                 ],
               ),
@@ -155,6 +157,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     context,
                     'Version',
                     '1.0.0',
+                  ),
+                  _buildActionTile(
+                    context,
+                    'View Tutorial',
+                    'Revisit the app introduction',
+                    Icons.school_outlined,
+                    () => _showOnboarding(context),
                   ),
                   _buildActionTile(
                     context,
@@ -614,6 +623,182 @@ class _SettingsScreenState extends State<SettingsScreen> {
         value,
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
           color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _exportData(BuildContext context) async {
+    try {
+      // Show loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      final backupService = BackupService();
+      final filePath = await backupService.exportData();
+
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+
+        if (filePath != null) {
+          // Show success dialog only if file was actually saved
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Export Successful'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Your data has been exported successfully!'),
+                  const SizedBox(height: 12),
+                  const Text('File saved to:'),
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      filePath,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
+        // If filePath is null, user cancelled, so don't show any message
+      }
+    } catch (e) {
+      // Close loading dialog if open
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        
+        // Show error dialog
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Export Failed'),
+            content: Text('Failed to export data: ${e.toString()}'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _importData(BuildContext context) async {
+    try {
+      // Show warning dialog first
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Import Data'),
+          content: const Text(
+            'Importing data will replace all your current tasks and study sessions. This action cannot be undone.\n\nAre you sure you want to continue?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Import'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed != true || !context.mounted) return;
+
+      // Show loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      final backupService = BackupService();
+      final imported = await backupService.importData();
+
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.of(context).pop();
+
+        if (imported) {
+          // Show success dialog only if import actually happened
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Import Successful'),
+              content: const Text('Your data has been imported successfully!'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
+        // If imported is false, user cancelled, so don't show any message
+      }
+    } catch (e) {
+      // Close loading dialog if open and context is still mounted
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        
+        // Show error dialog
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Import Failed'),
+            content: Text('Failed to import data: ${e.toString()}'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+  }
+
+  void _showOnboarding(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => OnboardingScreen(
+          isFromSettings: true,
+          onComplete: () {
+            Navigator.of(context).pop();
+          },
         ),
       ),
     );
