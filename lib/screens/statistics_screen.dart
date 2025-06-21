@@ -214,66 +214,98 @@ class StatisticsScreen extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.timer,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Total Time',
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    statsProvider.formattedTotalTime,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 400),
+            transitionBuilder: (child, animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.3),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                ),
+              );
+            },
+            child: Card(
+              key: ValueKey('total-time-${statsProvider.formattedTotalTime}'),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.timer,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Total Time',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    Text(
+                      statsProvider.formattedTotalTime,
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.task_alt,
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Sessions',
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${statsProvider.totalSessions}',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 400),
+            transitionBuilder: (child, animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.3),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                ),
+              );
+            },
+            child: Card(
+              key: ValueKey('sessions-${statsProvider.totalSessions}'),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.task_alt,
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Sessions',
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    Text(
+                      '${statsProvider.totalSessions}',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -315,7 +347,15 @@ class StatisticsScreen extends StatelessWidget {
                       borderData: FlBorderData(show: false),
                       sectionsSpace: 2,
                       centerSpaceRadius: 50,
+                      pieTouchData: PieTouchData(
+                        enabled: true,
+                        touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                          _handlePieChartTouch(context, event, pieTouchResponse, statsProvider);
+                        },
+                      ),
                     ),
+                    duration: const Duration(milliseconds: 600),
+                    curve: Curves.easeInOutCubic,
                   ),
                 ),
               ],
@@ -344,7 +384,12 @@ class StatisticsScreen extends StatelessWidget {
                     BarChartData(
                       alignment: BarChartAlignment.spaceAround,
                       maxY: _getMaxY(statsProvider),
-                      barTouchData: BarTouchData(enabled: false),
+                      barTouchData: BarTouchData(
+                        enabled: true,
+                        touchCallback: (FlTouchEvent event, barTouchResponse) {
+                          _handleBarChartTouch(context, event, barTouchResponse, statsProvider);
+                        },
+                      ),
                       titlesData: FlTitlesData(
                         show: true,
                         rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
@@ -383,6 +428,8 @@ class StatisticsScreen extends StatelessWidget {
                       borderData: FlBorderData(show: false),
                       barGroups: _buildBarChartGroups(context, statsProvider),
                     ),
+                    duration: const Duration(milliseconds: 600),
+                    curve: Curves.easeInOutCubic,
                   ),
                 ),
               ],
@@ -496,5 +543,82 @@ class StatisticsScreen extends StatelessWidget {
     if (statsProvider.taskStatistics.isEmpty) return 1;
     final maxSeconds = statsProvider.taskStatistics.first.totalSeconds;
     return (maxSeconds * 1.2).toDouble();
+  }
+
+  // Chart interaction handlers
+  void _handlePieChartTouch(BuildContext context, FlTouchEvent event, PieTouchResponse? pieTouchResponse, StatisticsProvider statsProvider) {
+    if (event is FlTapUpEvent && pieTouchResponse?.touchedSection != null) {
+      final touchedIndex = pieTouchResponse!.touchedSection!.touchedSectionIndex;
+      if (touchedIndex >= 0 && touchedIndex < statsProvider.taskStatistics.length) {
+        final taskStat = statsProvider.taskStatistics[touchedIndex];
+        _showTaskDetailDialog(context, taskStat);
+      }
+    }
+  }
+
+  void _handleBarChartTouch(BuildContext context, FlTouchEvent event, BarTouchResponse? barTouchResponse, StatisticsProvider statsProvider) {
+    if (event is FlTapUpEvent && barTouchResponse?.spot != null) {
+      final touchedIndex = barTouchResponse!.spot!.touchedBarGroupIndex;
+      if (touchedIndex >= 0 && touchedIndex < statsProvider.taskStatistics.length) {
+        final taskStat = statsProvider.taskStatistics[touchedIndex];
+        _showTaskDetailDialog(context, taskStat);
+      }
+    }
+  }
+
+  void _showTaskDetailDialog(BuildContext context, TaskStatistics taskStat) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        final hours = taskStat.totalSeconds ~/ 3600;
+        final minutes = (taskStat.totalSeconds % 3600) ~/ 60;
+        final sessions = taskStat.sessionCount;
+        final avgSessionTime = sessions > 0 ? taskStat.totalSeconds ~/ sessions : 0;
+        final avgHours = avgSessionTime ~/ 3600;
+        final avgMinutes = (avgSessionTime % 3600) ~/ 60;
+
+        return AlertDialog(
+          title: Text(
+            taskStat.task.name,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildDetailRow('Total Time:', '${hours}h ${minutes}m'),
+              _buildDetailRow('Sessions:', '$sessions'),
+              _buildDetailRow('Avg Session:', '${avgHours}h ${avgMinutes}m'),
+              const SizedBox(height: 16),
+              Text(
+                'Tap on charts to see detailed statistics for each task.',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
+          Text(value),
+        ],
+      ),
+    );
   }
 }

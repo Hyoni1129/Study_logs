@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/task_provider.dart';
+import '../providers/timer_provider.dart';
 import '../providers/statistics_provider.dart';
-import '../utils/app_theme.dart';
 import 'timer_screen.dart';
 import 'tasks_screen.dart';
 import 'statistics_screen.dart';
@@ -33,9 +33,19 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _initializeProviders() async {
+    // Capture providers before async operations
+    final taskProvider = context.read<TaskProvider>();
+    final statisticsProvider = context.read<StatisticsProvider>();
+    final timerProvider = context.read<TimerProvider>();
+    
     // Initialize providers when the app starts
-    await context.read<TaskProvider>().initialize();
-    await context.read<StatisticsProvider>().initialize();
+    await taskProvider.initialize();
+    await statisticsProvider.initialize();
+    
+    // Set up callback for automatic statistics refresh after session save
+    timerProvider.setSessionSavedCallback(() {
+      statisticsProvider.refresh();
+    });
   }
 
   @override

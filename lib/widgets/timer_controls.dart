@@ -46,7 +46,7 @@ class TimerControls extends StatelessWidget {
                     icon: Icons.stop,
                     label: 'Stop',
                     color: Colors.red,
-                    onPressed: () => _showStopConfirmation(context, timerProvider),
+                    onPressed: () => timerProvider.stopTimer(),
                     isPrimary: false,
                   ),
               ],
@@ -174,38 +174,5 @@ class TimerControls extends StatelessWidget {
         ),
       );
     }
-  }
-
-  void _showStopConfirmation(BuildContext context, TimerProvider timerProvider) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Stop Timer'),
-          content: Text(
-            timerProvider.elapsedSeconds > 0
-                ? 'Are you sure you want to stop the timer? Your current session will be saved.'
-                : 'Are you sure you want to stop the timer?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                timerProvider.stopTimer();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Stop'),
-            ),
-          ],
-        );
-      },
-    );
   }
 }

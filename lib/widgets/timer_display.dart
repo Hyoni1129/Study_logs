@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/timer_provider.dart';
 import 'circular_timer_progress.dart';
-import 'pulsing_widget.dart';
 
 class TimerDisplay extends StatelessWidget {
   const TimerDisplay({super.key});
@@ -25,13 +24,14 @@ class TimerDisplay extends StatelessWidget {
             ],
           ),
           child: Padding(
-            padding: const EdgeInsets.all(24.0), // Reduced padding
+            padding: const EdgeInsets.all(24.0),
             child: LayoutBuilder(
               builder: (context, constraints) {
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+                return SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                     // Timer type indicator
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -62,19 +62,26 @@ class TimerDisplay extends StatelessWidget {
                     
                     // Circular timer display for Pomodoro
                     if (timerProvider.timerType == TimerType.pomodoro)
-                      PulsingWidget(
-                        isActive: timerProvider.isRunning,
-                        child: CircularTimerProgress(
-                          progress: timerProvider.progress,
-                          progressColor: _getProgressColor(context, timerProvider.pomodoroPhase),
-                          backgroundColor: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-                          strokeWidth: 8.0,
-                          size: constraints.maxWidth * 0.7,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              // Main timer display
-                              FittedBox(
+                      CircularTimerProgress(
+                        progress: timerProvider.progress,
+                        progressColor: _getProgressColor(context, timerProvider.pomodoroPhase),
+                        backgroundColor: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                        strokeWidth: 8.0,
+                        size: constraints.maxWidth * 0.7,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Main timer display with smooth animation
+                            AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 300),
+                              transitionBuilder: (child, animation) {
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: child,
+                                );
+                              },
+                              child: FittedBox(
+                                key: ValueKey(timerProvider.formattedTimeRemaining),
                                 fit: BoxFit.scaleDown,
                                 child: Text(
                                   timerProvider.formattedTimeRemaining,
@@ -85,28 +92,35 @@ class TimerDisplay extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 8),
-                              // Phase indicator
-                              Text(
-                                'Round ${timerProvider.pomodoroRounds + 1}',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                                  fontWeight: FontWeight.w500,
-                                ),
+                            ),
+                            const SizedBox(height: 8),
+                            // Phase indicator
+                            Text(
+                              'Round ${timerProvider.pomodoroRounds + 1}',
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                fontWeight: FontWeight.w500,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       )
                     
                     // Stopwatch display
                     else
-                      PulsingWidget(
-                        isActive: timerProvider.isRunning,
-                        child: Column(
-                          children: [
-                            // Main timer display
-                            FittedBox(
+                      Column(
+                        children: [
+                          // Main timer display with smooth animation
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            transitionBuilder: (child, animation) {
+                              return FadeTransition(
+                                opacity: animation,
+                                child: child,
+                              );
+                            },
+                            child: FittedBox(
+                              key: ValueKey(timerProvider.formattedElapsedTime),
                               fit: BoxFit.scaleDown,
                               child: Text(
                                 timerProvider.formattedElapsedTime,
@@ -117,8 +131,8 @@ class TimerDisplay extends StatelessWidget {
                                 ),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     
                     // Timer state indicator
@@ -159,6 +173,7 @@ class TimerDisplay extends StatelessWidget {
                       ),
                     ],
                   ],
+                  ),
                 );
               },
             ),

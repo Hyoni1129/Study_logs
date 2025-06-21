@@ -17,6 +17,9 @@ class TimerProvider with ChangeNotifier {
   final AudioService _audioService = AudioService();
   final HapticService _hapticService = HapticService();
   
+  // Callback for when a session is saved (to refresh statistics)
+  VoidCallback? _onSessionSaved;
+  
   // Timer state
   TimerType _timerType = TimerType.stopwatch;
   TimerState _timerState = TimerState.stopped;
@@ -273,6 +276,9 @@ class TimerProvider with ChangeNotifier {
       );
       
       await _databaseHelper.insertStudySession(session);
+      
+      // Notify statistics provider to refresh
+      _onSessionSaved?.call();
     } catch (e) {
       _error = 'Failed to save study session: $e';
     }
@@ -334,6 +340,11 @@ class TimerProvider with ChangeNotifier {
     _pomodoroPhase = PomodoroPhase.focus;
     _setupPomodoroTimer();
     notifyListeners();
+  }
+
+  // Callback setter for statistics refresh
+  void setSessionSavedCallback(VoidCallback? callback) {
+    _onSessionSaved = callback;
   }
 
   // Utility methods

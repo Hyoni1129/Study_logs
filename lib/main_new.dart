@@ -3,7 +3,8 @@ import 'package:provider/provider.dart';
 import 'providers/task_provider.dart';
 import 'providers/timer_provider.dart';
 import 'providers/statistics_provider.dart';
-import 'screens/home_screen.dart';
+import 'providers/settings_provider.dart';
+import 'widgets/app_initializer.dart';
 
 void main() {
   runApp(const StudyLogsApp());
@@ -19,6 +20,7 @@ class StudyLogsApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => TaskProvider()),
         ChangeNotifierProvider(create: (context) => TimerProvider()),
         ChangeNotifierProvider(create: (context) => StatisticsProvider()),
+        ChangeNotifierProvider(create: (context) => SettingsProvider()),
       ],
       child: MaterialApp(
         title: 'Study Logs',
@@ -39,7 +41,7 @@ class StudyLogsApp extends StatelessWidget {
           fontFamily: 'SF Pro Text',
         ),
         themeMode: ThemeMode.system,
-        home: const HomeScreen(),
+        home: const AppInitializer(),
         debugShowCheckedModeBanner: false,
       ),
     );
