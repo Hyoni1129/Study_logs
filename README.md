@@ -17,9 +17,9 @@
 ## 📱 Screenshots
 
 <div align="center">
-  <img src="Log_Main.png" alt="Main Timer Interface" width="300" style="margin: 10px;">
-  <img src="Statistics_Main.png" alt="Statistics Overview" width="300" style="margin: 10px;">
-  <img src="Statistics_Bottom.png" alt="Weekly Consistency Chart" width="300" style="margin: 10px;">
+  <img src="lib/Markdown/Log_Main.png" alt="Main Timer Interface" width="300" style="margin: 10px;">
+  <img src="lib/Markdown/Statistics_Main.png" alt="Statistics Overview" width="300" style="margin: 10px;">
+  <img src="lib/Markdown/Statistics_Bottom.png" alt="Weekly Consistency Chart" width="300" style="margin: 10px;">
 </div>
 
 *From left to right: Main timer interface with task selection and Pomodoro controls, comprehensive statistics with interactive charts, and weekly study consistency tracking*
