@@ -134,17 +134,27 @@ Study Logs is production-ready with:
 - ✅ **Accessibility**: Full VoiceOver and Dynamic Type support
 - ✅ **Testing**: Comprehensive unit and integration test coverage
 
-## 👨‍💻 Developer
+## 📜 License
 
-**JeongHan Lee**
-- Email: Team.Stella.Global@gmail.com
+This project is licensed under the **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License**.
 
-## 📄 License
-
-This project is licensed under the MIT License.
+**Stella Prompt Hub © 2025 by JeongHan Lee** is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
 
 ---
 
+## 👨‍💻 Developer
+
+<div align="center">
+
+**JeongHan Lee**
+
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Hyoni1129)
+
+*Passionate about AI, web development, and open source projects*
+
+</div>
+
+---
 <div align="center">
   <p>Made with ❤️ for students everywhere</p>
   <p><strong>Study smarter, not harder</strong></p>
